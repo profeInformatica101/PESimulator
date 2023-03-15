@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafo con D3.js</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+           .link {
+        stroke: #0000FF; /* Color azul */
+        stroke-opacity: 0.6;
+    }
+    
+    
+    .node {
+        stroke: #7b3636;
+        stroke-width: 1.5px;
+    }
+
+    text {
+        font-family: sans-serif;
+        font-size: 12px;
+        fill: black;
+    }
+
+    circle {
+        fill: #69b3a2;
+    }
+    </style>
+</head>
+<body>
+    <script>
+      const nodes = [
+    {id: 1, name: "Sistemas Gestores de Base de Datos"},
+    {id: 2, name: "Funciones"},
+    {id: 3, name: "Componentes"},
+    {id: 4, name: "Arquitecturas de Referencia"},
+    {id: 5, name: "Arquitecturas Operacionales"},
+    {id: 6, name: "Tipos de Sistemas"},
+    {id: 7, name: "Consulta y actualización"},
+    {id: 8, name: "Integridad y seguridad"},
+    {id: 9, name: "Recuperación y concurrencia"},
+    {id: 10, name: "Vistas y acceso a datos"},
+    {id: 11, name: "Motor de almacenamiento"},
+    {id: 12, name: "Motor de consulta"},
+    {id: 13, name: "Capa de aplicación"},
+    {id: 14, name: "Cliente-Servidor"},
+    {id: 15, name: "N-Tier"},
+    {id: 16, name: "Arquitectura P2P"},
+    {id: 17, name: "Bases de datos relacionales"},
+    {id: 18, name: "Bases de datos NoSQL"},
+    {id: 19, name: "Bases de datos NewSQL"},
+    {id: 20, name: "Bases de datos en tiempo real"},
+];
+const links = [
+    {source: 1, target: 2},
+    {source: 1, target: 3},
+    {source: 1, target: 4},
+    {source: 1, target: 5},
+    {source: 1, target: 6},
+    {source: 2, target: 7},
+    {source: 2, target: 8},
+    {source: 2, target: 9},
+    {source: 2, target: 10},
+    {source: 3, target: 11},
+    {source: 3, target: 12},
+    {source: 3, target: 13},
+    {source: 4, target: 14},
+    {source: 4, target: 15},
+    {source: 5, target: 16},
+    {source: 6, target: 17},
+    {source: 6, target: 18},
+    {source: 6, target: 19},
+    {source: 6, target: 20},
+];
+const width = 800;
+const height = 600;
+
+const svg = d3.select('body')
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height);
+
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+    .force("charge", d3.forceManyBody().strength(-200))
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
+const link = svg.append("g")
+    .attr("class", "link")
+    .selectAll("line")
+    .data(links)
+    .join("line");
+
+const node = svg.append("g")
+    .attr("class", "node")
+    .selectAll("g")
+    .data(nodes)
+    .join("g");
+
+node.append("circle")
+    .attr("r", 10)
+    .call(drag(simulation));
+
+node.append("text")
+    .attr("dx", 12)
+    .attr("dy", ".35em")
+    .text(d => d.name);
+
+simulation.on("tick", () => {
+    link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+    node
+        .attr("transform", d => `translate(${d.x}, ${d.y})`);
+});
+
+function drag(simulation) {
+    function dragstarted(event) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+    }
+
+    function dragged(event) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+    }
+
+    function dragended(event) {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+    }
+
+    return d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
+}
+    </script>
+</body>
+</html>
